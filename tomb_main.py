@@ -15,6 +15,9 @@ from memo import *
 
 screen_width = 80
 
+combat_state = 0
+combat_round = 0
+
 #ai = 0
 
 @memoize
@@ -30,8 +33,8 @@ def enablePrint():
 class player:
   def __init__(self):
     self.name = ''
-    self.attack = 5
-    self.health = 50
+    self.attack = 6
+    self.health = 110
 #    self.status_scares = []
     self.location = 'Great_Hall'
     self.card = ''
@@ -40,19 +43,30 @@ class player:
 
 class vampire:
   def __init__(self):
-#    ai.__init__(self)
+
     self.name = 'Vampire'
     self.attack = 5
-    self.health = 5
+    self.health = 100
     self.location = 'Tropy_Room'
     self.dead = False
     self.loot = ['sunscreen', 'wand']
+
+class zombie:
+  def __init__(self):
+
+    self.name = 'zombie'
+    self.attack = 5
+    self.health = 50
+    self.location = 'Kitchen'
+    self.dead = False
+    self.loot = ['rags','old belt','copper key']
 
 global my_player
 my_player = player()
 
 global ai
 ai = vampire()
+ai = zombie()
 
 
 #class ai:
@@ -76,13 +90,7 @@ ai = vampire()
 #    self.location = 'Trophy_Room'
 
 
-#class zombie(ai):
-#  def __init__(self):
-#    ai.__init__(self)
-#    self.name = 'zombie'
-#    self.attack = 5
-#    self.health = 30
-#    self.location = location
+
 
 #aiList = [ bats, vampire, zombie ]
 
@@ -201,15 +209,15 @@ def player_look():
 #                                                                                #
  ################################################################################
 
-def ai_intercept(my_player, ai, whereabouts, playerlocation):
+def ai_intercept(combat_round, my_player, ai, whereabouts, playerlocation):
   whereabouts = ai.location.lower()
   playerlocation = my_player.location.lower()
-  if whereabouts != playerlocation:
-#    sleep(0.02)
-    whereabouts = playerlocation
+#  if whereabouts != playerlocation:
+#    sleep(0.10)
+  whereabouts = playerlocation
 #    print(ai.speak())
-    combat_state = 1
-    hand_to_hand_combat(my_player, ai, whereabouts, playerlocation)
+  combat_state = 1
+  hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
 
 def player_move(myQuarter):
   print('North - South - East - West')
@@ -233,26 +241,18 @@ def player_move(myQuarter):
     game_over(destination)
 
 
-def ai_death(my_player, ai, whereabouts, playerlocation):
-  if ai.health < 1:
-    file = open(''+ str(whereabouts)+'.txt','w+')
-    file.write("," + str(ai.loot)+ "")
-#    file.remove(""+ str(ai.name()) + "")
-    file.close()
-    print("The " + str(ai.name())+" has been defeated.")
-
-    ai.dead = True
-    ai.location = ''
-    whereabouts = ''
-    combat_state = 0
-    combat_round = 0
 
 def ai_fight(my_player, ai, whereabouts, playerlocation):
-  combat_state = 0
+  combat_round = 0
+  combat_state = 1
   combat_round = combat_round
-  while combat_state == 0:
+  while combat_state == 1:
     if whereabouts != playerlocation:
-      ai_intercept(my_player, ai, whereabouts, playerlocation)
+      time.sleep(0.02)
+#      ai.location = my_player.location
+#      ai_fight(my_player, ai, whereabouts, playerlocation)
+#      time.sleep(0.06)
+      ai_intercept(combat_round, my_player, ai, whereabouts, playerlocation)
     
     else:
       combat_state = 1
@@ -261,52 +261,118 @@ def ai_fight(my_player, ai, whereabouts, playerlocation):
 
       print( "" + str(ai.name.upper()) + " attacks!!!\n")
 
-      hand_to_hand_combat(my_player, ai, whereabouts, playerlocation)
+      hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
     
 
-def hand_to_hand_combat(my_player, ai, whereabouts, playerlocation):
+def hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation):
   combat_state = 1
-  combat_round = 1
+  combat_round += 1
   while combat_state == 1:
 
 
-    while combat_round % 3 != 0:                       
-      while my_player.health > 0:
-        while ai.health > 0:
+#    while combat_round % 3 != 0:                       
+    if my_player.health > 0:
+      if ai.health > 0:
         
 
 
-          player_dam_math = ((int(my_player.attack)) * (random.randint(25, 50))) - ((int(ai.attack)) * (random.randint(10, 30)))
-          ai_dam_math = ((int(ai.attack)) * (random.randint(25, 50))) - ((int(my_player.attack)) * (random.randint(10, 30)))   
+        player_dam_math = ((int(my_player.attack)) * (random.randint(5, 10))) - ((int(ai.attack)) * (random.randint(1, 4)))
+        ai_dam_math = ((int(ai.attack)) * (random.randint(5, 10))) - ((int(my_player.attack)) * (random.randint(1, 4)))   
                                
-          my_player.health -= ai_dam_math
-          print "Points of damage taken: %i" % (ai_dam_math)
-          ai.health -= player_dam_math
+        my_player.health -= abs(ai_dam_math)
+        print "Points of damage taken: %i" % (ai_dam_math)
+        ai.health -= abs(player_dam_math)
+        if ai.health <= 0:
+          combat_state = 0
+          ai_death(ai, whereabouts)
+        elif my_player.health <= 0:
+          print('What a lovely youth, still so young and strong. Such a pity...Death shakes \n' +
+'his head, lifts his scythe and cuts you down...Such a pity...\n\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'0+0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-+0\n'+
+'0|0000000000000000000000000000000000000000000000000000000000000000000000000000|0\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'0|0            0  0000  0       0          00         0  00000  0        00000|0\n'+
+'000 0000  0000 0  0000  0 00000 0 000  000 00 0000000 0   000   0 000000  000000\n'+
+'0|0 0000  0000 0  0000  0 0000000 000  000 00 0000000 0 0 000 0 0 000000  0000|0\n'+
+'00000000  000000  0000  0    00000000  000000 0000000 0 00 0 00 0       00000000\n'+
+'0|000000  000000        0 00000000000  000000 0000000 0 00 0 00 0 000000  0000|0\n'+
+'00000000  000000  0000  0 00000 00000  000000 0000000 0 00   00 0 000000  000000\n'+
+'0|000000  000000  0000  0       00000  000000         0 000 000 0        00000|0\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'0|0000000000000000000000000000000000000000000000000000000000000000000000000000|0\n'+
+'0+-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0+0\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'\n\n\n\nYou go on ahead, we will wait right here...\n')
+          sys.exit()
+        else:
+ #         return combat_round
           print "Points of damge you deal: %i" % (player_dam_math)
-          combat_round += 1
-  
-          continue
-      
-    
-        combat_state -= 1
-        ai_death(whereabouts)
-             
-      combat_state = 0
-            
-      my_player.location = DEATH
-
-    quarter = raw_input("Do you want to fight or run: \n" )
-    if quarter.lower() == ('fight'):
-      combat_round += 1
-      return combat_round
-    elif quarter.lower() == ('run'):
-      player_move(quarter.lower())
+   #       combat_round += 1
+          print "Your health: %i" % (my_player.health)
+          print "" + ai.name + " health: %i" % (ai.health)
+          print "Combat round: " ,combat_round
+          quarter = raw_input("Do you want to fight or run: \n" )
+          if quarter.lower() == ('fight'):
+   #         combat_round += 1
+            raw_input("Press Enter to Continue")
+  #        return combat_round
+            hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
+           
+          elif quarter.lower() == ('run'):
+            player_move(quarter.lower())
                    
-    else:
-      print("Unknown command")
-      print("The battle continues.\n")                            
+          else:
+            print("Unknown command")
+            print("The battle continues.\n")  
+            hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
+    
+      else:
+        combat_state -= 1
+        ai_death(ai, whereabouts)
+    else:  
+     
+      print('What a lovely youth, still so young and strong. Such a pity...Death shakes \n' +
+'his head, lifts his scythe and cuts you down...Such a pity...\n\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'0+0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-+0\n'+
+'0|0000000000000000000000000000000000000000000000000000000000000000000000000000|0\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'0|0            0  0000  0       0          00         0  00000  0        00000|0\n'+
+'000 0000  0000 0  0000  0 00000 0 000  000 00 0000000 0   000   0 000000  000000\n'+
+'0|0 0000  0000 0  0000  0 0000000 000  000 00 0000000 0 0 000 0 0 000000  0000|0\n'+
+'00000000  000000  0000  0    00000000  000000 0000000 0 00 0 00 0       00000000\n'+
+'0|000000  000000        0 00000000000  000000 0000000 0 00 0 00 0 000000  0000|0\n'+
+'00000000  000000  0000  0 00000 00000  000000 0000000 0 00   00 0 000000  000000\n'+
+'0|000000  000000  0000  0       00000  000000         0 000 000 0        00000|0\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'0|0000000000000000000000000000000000000000000000000000000000000000000000000000|0\n'+
+'0+-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0+0\n'+
+'00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
+'\n\n\n\nYou go on ahead, we will wait right here...\n')
+      sys.exit()
 
   return
+
+#def ai_death(combat_round, my_player, ai, whereabouts, playerlocation):
+def ai_death(ai, whereabouts):
+  print("Victory!")
+
+  print "Your health: %i" % (my_player.health)
+  file = open('inventory.txt','w+')
+  file.write("" + str(ai.loot) + "\n")
+#    file.remove(""+ str(ai.name()) + "")
+  file.close()
+  print("The " + ai.name +" has been defeated.")
+
+  ai.dead = True
+  ai.location = ''
+  whereabouts = ''
+  combat_state = 0
+  combat_round = 0
+  ai = ''
+  prompt()
+
 
 ##############################################################################################
 ##############################################################################################
@@ -356,15 +422,15 @@ def examine_curtain():
 ###############################################################################################
 
 class Tarotcard(object):
-	def __init__(self, name, firstkey, secondkey, danger, fear):
-		self.name = name
-		self.firstkey = firstkey
-		self.secondkey = secondkey
-		self.danger = danger
-		self.fear = fear
+  def __init__(self, name, firstkey, secondkey, danger, fear):
+    self.name = name
+    self.firstkey = firstkey
+    self.secondkey = secondkey
+    self.danger = danger
+    self.fear = fear
 
-	def __repr__(self):
-		return '\nYour card is the {} \nwho guides you with {} and protects you \nfrom {} but beware of this danger: {} \nand rightly fear {}\n'.format(self.name, self.firstkey, self.secondkey, self.danger, self.fear)
+  def __repr__(self):
+    return '\nYour card is the {} \nwho guides you with {} and protects you \nfrom {} but beware of this danger: {} \nand rightly fear {}\n'.format(self.name, self.firstkey, self.secondkey, self.danger, self.fear)
 
 my_card1 = Tarotcard('the_fool','capability','empowerment','your own ego','shortcuts')
 my_card2 = Tarotcard('the magician','intuition','initiation','Being aloof','to standoff')
@@ -448,11 +514,17 @@ def escape():
 
 
 def run_from_fortuneteller():
-  playerlocation = my_player.location()
-  whereabout = ai.location()
+
   print("The fortune teller screams: 'No one runs from me!\n")
-  ai = zombie(Zombie, 5, 30, 'Kitchen', False, ['old boots','copper key'])
-  hand_to_hand(whereabouts, playerlocation, player, ai)
+
+  my_player = player()
+  ai = zombie()
+  whereabouts = ai.location.lower()
+  playerlocation = my_player.location.lower()
+  ai_fight(my_player, ai, whereabouts, playerlocation)
+
+#  ai = zombie(Zombie, 5, 30, 'Kitchen', False, ['old boots','copper key'])
+#  hand_to_hand(whereabouts, playerlocation, player, ai)
 
 def fix_clock():
   pass
