@@ -1,0 +1,14 @@
+map
+flashlight
+backpack
+gum
+lighter
+crystal
+cloak
+sword
+emerald
+shovel
+cloak
+rake
+bronze sword
+
