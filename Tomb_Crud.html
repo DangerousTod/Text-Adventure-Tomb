@@ -1,0 +1,255 @@
+<DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pouchdb@7.0.0/dist/pouchdb.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery"</script>
+    <script src="https://cdn.jsdelivr.net/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <p><br/><p>
+        <div class="row">
+          <div class="col-md-8">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>id</th>
+                  <th>lower</th>
+                  <th>is_a</th>
+
+                  <th width="130">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in items" v-bind:key="item.id">
+                  <td>{{ item._id }}</td>
+                  <td>{{ item.lower }}</td>
+                  <td>{{ item.is_a }}</td>
+
+                  <td class="text-center">
+                    <button @click="edit(item)" class="btn btn-warning btn-sm">Edit</button>
+                    <button @click="destroy(item)" class="btn btn-danger btn-sm">Trash</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-4">
+            <form>
+
+              <div class="form-group">
+                <label>Id</label>
+                <input type="text" v-model="input._id" class="form-control" />
+              </div>
+
+              <div class="form-group">
+                <label>Super</label>
+                <input type="text" v-model="input.super" class="form-control" maxlength="21"/>
+              </div>
+
+              <div class="form-group">
+                <label>Lower</label>
+                <input type="text" v-model="input.lower" class="form-control" maxlength="21"/>
+              </div>
+
+              <div class="form-group">
+                <label>Description</label>
+                <textarea class="form-control" v-model="input.description" maxlength="150"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>On use</label>
+                <textarea class="form-control" v-model="input.on_use" maxlength="350"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Special</label>
+                <textarea class="form-control" v-model="input.special" maxlength="350"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Is a</label>
+                <input type="text" v-model="input.is_a" class="form-control" maxlength="15"/>
+              </div>
+
+              <button v-if="savebtn" @click.prevent="save" class="btn btn-primary">Save</button>
+              <button v-if="updatebtn" @click.prevent="update(input._id)" class="btn btn-warning">Update</button>
+              <button @click.prevent="clear" class="btn btn-info">Clear</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <script>
+
+      window.db = new PouchDB('tomb_objs')
+
+      var app = new Vue({
+        el: '#app',
+        data: {
+          items : [],
+          input: {
+            _id: '',
+            super: '',
+            lower: '',
+            description: '',
+            on_use: '',
+            special: '',
+            is_a: ''
+          },
+          savebtn: true,
+          updatebtn: false
+        },
+        created: function () {
+          this.view()
+          this.localData()
+          this.items = JSON.parse(localStorage.getItems('items'))
+        },
+        methods: {
+          localData: function () {
+            let parsed = JSON.stringify(this.items)
+            localStorage.setItem('items', parsed)
+          },
+          view: function () {
+            let vm = this
+            db.allDocs({
+              include_docs: true
+            }).then(function(response) {
+              for(var i = 0; i < response.rows.length; i++) {
+                vm.items.push(response.rows[i].doc)
+              }
+            }).catch(function(error) {
+              console.log(error)
+            })
+          },
+          save: function () {
+
+            var id = this.input._id
+            var su = this.input.super
+            var lw = this.input.lower
+            var de = this.input.description
+            var ou = this.input.on_use
+            var sp = this.input.special
+            var ia = this.input.is_a
+
+            db.put({
+              _id: id,
+              super: su,
+              lower: lw,
+              description: de,
+              on_use: ou,
+              special: sp,
+              is_a: ia
+            }).then(function(response){
+
+            }).catch(function(error) {
+              console.log(error)
+            })
+
+            this.items.push({_id: id, super: su, lower: lw, description: de, on_use: ou, special: sp, is_a: ia})
+            this.clear()
+
+            this.localData()
+
+            swal('Added', 'Thank you', 'success')
+          },
+          clear: function () {
+            this.savebtn = true
+            this.updatebtn = false
+            this.input._id = ''
+            this.input.super= ''
+            this.input.lower= ''
+
+            this.input.description = ''
+            this.input.on_use = ''
+            this.input.special = ''
+            this.input.is_a= ''
+
+          },
+          edit: function (item) {
+            this.savebtn = false
+            this.updatebtn = true
+            this.input._id = item._id
+            this.input.super = item.super
+            this.input.lower = item.lower
+            this.input.description = item.description
+            this.input.on_use = item.on_use
+            this.input.special = item.special
+            this.input.is_a = item.is_a
+          },
+          update: function (id) {
+       //     var myid = id - 1
+       //     Object.assign(this.items[myid], this.input)
+            var id = this.input._id
+            var su = this.input.super
+            var lw = this.input.lower
+            var de = this.input.description
+            var ou = this.input.on_use
+            var sp = this.input.special
+            var ia = this.input.is_a
+
+            db.get(id).then(function(doc){
+              return db.put({
+                _id: id,
+                _rev: doc._rev,
+                super: su,
+                lower: lw,
+                description: de,
+                on_use: ou,
+                special: sp,
+                is_a: ia
+              })
+            }).then(function(response){
+
+            }).catch(function(error){
+              console.log(error)
+            })
+
+            this.clear()
+
+            this.localData()
+
+            swal('Updated', 'Good Work', 'warning')
+          },
+          destroy: function (item) {
+            var del = this.items.indexOf(item)
+            swal({
+              title: "Are you sure",
+              text: "Input will be destroyed",
+              icon: 'error',
+              buttons: true,
+              dangerMode: true
+            }).then((willDelete) => {
+              if(willDelete){
+                this.items.splice(del, 1)
+                db.get(item._id).then(function(doc){
+                  return db.remove(doc)
+                }).then(function(response){
+
+                }).catch(function(error){
+                  console.log(error)
+                })
+              } else {
+                
+              }
+            })
+          }
+        }
+      })
+
+    </script>
+  </body>
+</html>
