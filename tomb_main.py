@@ -1,3 +1,8 @@
+#######################################################################################################
+#         developed by Jonathan Engwall, October of 2018 in Tijuana, MX                               #
+#               PYTHON CMD CRUD MUD: THE TOMB INTERACTIVE FICTION                                     #
+#         	ENGWALLJONATHANTHEREAL@GMAIL.COM **2018**                                                 #
+#######################################################################################################
 
 import textwrap
 import sys
@@ -9,7 +14,6 @@ import functools
 
 from time import sleep
 from zonemap import *
-from tarotzone import *
 from masterList import *
 from memo import *
 
@@ -17,8 +21,6 @@ screen_width = 80
 
 combat_state = 0
 combat_round = 0
-
-#ai = 0
 
 @memoize
 def blockPrint():
@@ -35,11 +37,14 @@ class player:
     self.name = ''
     self.attack = 6
     self.health = 110
-#    self.status_scares = []
     self.location = 'Great_Hall'
     self.card = ''
     self.game_over = False
 
+#######################################################################################################
+#                                                                                                     #
+#                                          enemy options and global                                   #
+#######################################################################################################
 
 class vampire:
   def __init__(self):
@@ -49,7 +54,6 @@ class vampire:
     self.health = 100
     self.location = 'Tropy_Room'
     self.dead = False
-    self.loot = ['sunscreen', 'wand']
 
 class zombie:
   def __init__(self):
@@ -59,7 +63,6 @@ class zombie:
     self.health = 50
     self.location = 'Kitchen'
     self.dead = False
-    self.loot = ['rags','old belt','copper key']
 
 global my_player
 my_player = player()
@@ -67,7 +70,6 @@ my_player = player()
 global ai
 ai = vampire()
 ai = zombie()
-
 
 #class ai:
 #  def __init__(self):
@@ -89,10 +91,10 @@ ai = zombie()
 #    self.dead = False
 #    self.location = 'Trophy_Room'
 
-
-
-
-#aiList = [ bats, vampire, zombie ]
+#######################################################################################################
+#                                                                                                     #
+#                                          necc. introduction art                                     #
+#######################################################################################################
 
 def title_screen_selections():
   choice = raw_input("Command: ")
@@ -129,8 +131,6 @@ def title_screen():
   print('00000000000000000000000000000000000000000000000000000000000000000000000000000000\n')
   title_screen_selections()
 
-
-
 # '''
 # ##  ##  ##   ##
 # ###########  ##
@@ -158,6 +158,11 @@ solved_places = {'Top Left Corner Room':False, 'Lower Left Room':False, 'Top Rig
 #                 '':False, '':False, '':False, '':False, '':False, '':False, '':False, '':False,
 #                 '':False, '':False, '':False, '':False, '':False, '':False, '':False, '':False,
 #                }
+
+#######################################################################################################
+#                                                                                                     #
+#                                          game CMD handlers                                          #
+#######################################################################################################
 
 def print_location():
   playerlocation = my_player.location.lower()
@@ -200,6 +205,11 @@ def player_look():
     print('' + zonemap[my_player.location][ITEM] + ' ')
     prompt()
 
+#######################################################################################################
+#                                                                                                     #
+#                                          combat and logic for AI                                    #
+#######################################################################################################
+
  ################################################################################
 #                                                                                #
 #                          OUR VILLAINS                                          #
@@ -212,10 +222,7 @@ def player_look():
 def ai_intercept(combat_round, my_player, ai, whereabouts, playerlocation):
   whereabouts = ai.location.lower()
   playerlocation = my_player.location.lower()
-#  if whereabouts != playerlocation:
-#    sleep(0.10)
   whereabouts = playerlocation
-#    print(ai.speak())
   combat_state = 1
   hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
 
@@ -239,8 +246,13 @@ def player_move(myQuarter):
   elif destination in ['escape']:
     destination = zonemap[my_player.location][EXIT]
     game_over(destination)
+  else:
+    print("Where is that?\nYou stay where you are.\n")
 
-
+#######################################################################################################
+#                                                                                                     #
+#                                          combat loop basic                                          #
+#######################################################################################################
 
 def ai_fight(my_player, ai, whereabouts, playerlocation):
   combat_round = 0
@@ -249,33 +261,21 @@ def ai_fight(my_player, ai, whereabouts, playerlocation):
   while combat_state == 1:
     if whereabouts != playerlocation:
       time.sleep(0.02)
-#      ai.location = my_player.location
-#      ai_fight(my_player, ai, whereabouts, playerlocation)
-#      time.sleep(0.06)
       ai_intercept(combat_round, my_player, ai, whereabouts, playerlocation)
-    
     else:
       combat_state = 1
       print("" + str(ai.name.upper()) + " has found you!\n")
       print("The mad beast looks at you for a moment...\n")
-
       print( "" + str(ai.name.upper()) + " attacks!!!\n")
-
       hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
     
-
 def hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation):
   combat_state = 1
   combat_round += 1
   while combat_state == 1:
-
-
-#    while combat_round % 3 != 0:                       
     if my_player.health > 0:
       if ai.health > 0:
         
-
-
         player_dam_math = ((int(my_player.attack)) * (random.randint(5, 10))) - ((int(ai.attack)) * (random.randint(1, 4)))
         ai_dam_math = ((int(ai.attack)) * (random.randint(5, 10))) - ((int(my_player.attack)) * (random.randint(1, 4)))   
                                
@@ -306,17 +306,13 @@ def hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation
 '\n\n\n\nYou go on ahead, we will wait right here...\n')
           sys.exit()
         else:
- #         return combat_round
           print "Points of damge you deal: %i" % (player_dam_math)
-   #       combat_round += 1
           print "Your health: %i" % (my_player.health)
           print "" + ai.name + " health: %i" % (ai.health)
           print "Combat round: " ,combat_round
           quarter = raw_input("Do you want to fight or run: \n" )
           if quarter.lower() == ('fight'):
-   #         combat_round += 1
             raw_input("Press Enter to Continue")
-  #        return combat_round
             hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
            
           elif quarter.lower() == ('run'):
@@ -328,11 +324,11 @@ def hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation
             hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation)
     
       else:
-        combat_state -= 1
+        combat_state = 0
         ai_death(ai, whereabouts)
     else:  
      
-      print('What a lovely youth, still so young and strong. Such a pity...Death shakes \n' +
+      print('\nWhat a lovely youth, still so young and strong. Such a pity...Death shakes \n' +
 'his head, lifts his scythe and cuts you down...Such a pity...\n\n'+
 '00000000000000000000000000000000000000000000000000000000000000000000000000000000\n'+
 '0+0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-+0\n'+
@@ -354,17 +350,16 @@ def hand_to_hand_combat(combat_round, my_player, ai, whereabouts, playerlocation
 
   return
 
-#def ai_death(combat_round, my_player, ai, whereabouts, playerlocation):
 def ai_death(ai, whereabouts):
-  print("Victory!")
-
+  print("Victory!\nThe " + ai.name +" has been defeated.")
+  file = open('inventory.txt','a')
+  reward = ['pocketwatch','copper key','faded hat','old belt','wand','dirty rags']
+  t_int = random.randint(0,5)
+  loot = reward.pop(int(t_int))
+  file.write('' + loot + '\n')
+  file.close
+  print "You gained a " + loot + " for your effort.\n"
   print "Your health: %i" % (my_player.health)
-  file = open('inventory.txt','w+')
-  file.write("" + str(ai.loot) + "\n")
-#    file.remove(""+ str(ai.name()) + "")
-  file.close()
-  print("The " + ai.name +" has been defeated.")
-
   ai.dead = True
   ai.location = ''
   whereabouts = ''
@@ -373,10 +368,10 @@ def ai_death(ai, whereabouts):
   ai = ''
   prompt()
 
-
-##############################################################################################
-##############################################################################################
-
+#######################################################################################################
+#                                                                                                     #
+#                                          def for challenges                                         #
+#######################################################################################################
 
 def examine_bookshelf():
   pass
@@ -394,9 +389,9 @@ def get_sword():
     file.close()
     my_player.attack += 50
     file = open('inventory.txt','a')
-    file.write('bronze sword\n') ##############################################
+    file.write('bronze sword\n')
     file.close
-    return #player.attack
+    return
 
 def examine_curtain():
   print("You pull aside the curtain to reveal a bronze short sword.\n")
@@ -414,12 +409,9 @@ def examine_curtain():
     else:
       print("You will get it next time")
       prompt()
-###############################################################################################
 
-
-
-
-###############################################################################################
+                                          #fortune teller app
+#######################################################################################################
 
 class Tarotcard(object):
   def __init__(self, name, firstkey, secondkey, danger, fear):
@@ -432,34 +424,30 @@ class Tarotcard(object):
   def __repr__(self):
     return '\nYour card is the {} \nwho guides you with {} and protects you \nfrom {} but beware of this danger: {} \nand rightly fear {}\n'.format(self.name, self.firstkey, self.secondkey, self.danger, self.fear)
 
-my_card1 = Tarotcard('the_fool','capability','empowerment','your own ego','shortcuts')
-my_card2 = Tarotcard('the magician','intuition','initiation','Being aloof','to standoff')
-my_card3 = Tarotcard('the high priestess','fertility','nurturing','Overindulging','addiction')
-my_card4 = Tarotcard('the empress','authority','structure','Micromanaging','overt force and order')
-my_card5 = Tarotcard('the emperor','guidance','belief','experience as a misguide','Restricting access to the gods')
-my_card6 = Tarotcard('the hierophant','love','choice','Debilitating passion','Ill-informed decisions')
-my_card7 = Tarotcard('the lovers','advancement','success','Resting on laurels','impulsive behavior')
-my_card8 = Tarotcard('the chariot','discipline','vitality','Indulgence','the sick bed')
-my_card9 = Tarotcard('strength','solitude','withdrawal','angst','hiding power')
-my_card10 = Tarotcard('the hermit','luck','revolution','gambling','fighting Nature')
-my_card11 = Tarotcard('the wheel','balance','objectivity','criticism','favoritism')
-my_card12 = Tarotcard('justice','enlightenment','reversals','yielding','laying blame')
-my_card13 = Tarotcard('the hanged man','ending','departure','fatalism','rumination')
-my_card14 = Tarotcard('death','blending','harmony','zealotry','treachery')
-my_card15 = Tarotcard('temperance','shadow','delusion','materialism','manifest posession')
-my_card16 = Tarotcard('the devil','demolition','destruction','anachronsim','Malicious destruction')
-my_card17 = Tarotcard('the tower','hope','truth','Denial','locum lacuna')
-my_card18 = Tarotcard('the star','mystery','uncertainty','fantasy','melancholy')
-my_card19 = Tarotcard('the moon','joy','energy','delusion','boastfulness')
-my_card20 = Tarotcard('the sun','revival','invitation','inversion','disinclimant self')
-my_card21 = Tarotcard('judgement','wholeness','fullness','malice','malaise')
-my_card22 = Tarotcard('the world','desire','invention','Indolence','cowardice')
+my_card1 = Tarotcard('The Fool','capability','empowerment','your own ego','shortcuts')
+my_card2 = Tarotcard('The Magician','intuition','initiation','Being aloof','to standoff')
+my_card3 = Tarotcard('The High priestess','fertility','nurturing','Overindulging','addiction')
+my_card4 = Tarotcard('The Empress','authority','structure','Micromanaging','overt force and order')
+my_card5 = Tarotcard('The Emperor','guidance','belief','experience as a misguide','Restricting access to the gods')
+my_card6 = Tarotcard('The Hierophant','love','choice','Debilitating passion','Ill-informed decisions')
+my_card7 = Tarotcard('The Lovers','advancement','success','Resting on laurels','impulsive behavior')
+my_card8 = Tarotcard('The Chariot','discipline','vitality','Indulgence','the sick bed')
+my_card9 = Tarotcard('Strength','solitude','withdrawal','angst','hiding power')
+my_card10 = Tarotcard('The Hermit','luck','revolution','gambling','fighting Nature')
+my_card11 = Tarotcard('The Wheel','balance','objectivity','criticism','favoritism')
+my_card12 = Tarotcard('Justice','enlightenment','reversals','yielding','laying blame')
+my_card13 = Tarotcard('The Hanged Man','ending','departure','fatalism','rumination')
+my_card14 = Tarotcard('Death','blending','harmony','zealotry','treachery')
+my_card15 = Tarotcard('Temperance','shadow','delusion','materialism','manifest posession')
+my_card16 = Tarotcard('The Devil','demolition','destruction','anachronsim','Malicious destruction')
+my_card17 = Tarotcard('The Tower','hope','truth','Denial','locum lacuna')
+my_card18 = Tarotcard('The Star','mystery','uncertainty','fantasy','melancholy')
+my_card19 = Tarotcard('The Moon','joy','energy','delusion','boastfulness')
+my_card20 = Tarotcard('The Sun','revival','invitation','inversion','disinclimant self')
+my_card21 = Tarotcard('Judgement','wholeness','fullness','malice','malaise')
+my_card22 = Tarotcard('The World','desire','invention','Indolence','cowardice')
 
-
-
-
-###############################################################################################
-
+#####################################itterator#for#dictionary##################################
 
 def future_card(for_future):
 
@@ -497,16 +485,18 @@ def past_card():
   raw_input("\nWhen you are ready press enter\n")
   present_card(for_present)
 
+#######################################################################################################
 
-###############################################################################################
+#######################################################################################################
+#                                                                                                     #
+#                                                challenge defs cont.                                 #
+#######################################################################################################
 
 def hear_fortune():
   print("'Place your hand on the deck...\n'")
   print("She seems dizzy, 'I see now and I see then...I see what will be...'\n")
   raw_input("\n<<When you are ready hear your fortune press enter>>\n\n")
   past_card()
-#  past_card_handler()
-#  print(my_card15)
 
 def escape():
   destination = zonemap[my_player.location][EXIT]
@@ -523,16 +513,11 @@ def run_from_fortuneteller():
   playerlocation = my_player.location.lower()
   ai_fight(my_player, ai, whereabouts, playerlocation)
 
-#  ai = zombie(Zombie, 5, 30, 'Kitchen', False, ['old boots','copper key'])
-#  hand_to_hand(whereabouts, playerlocation, player, ai)
-
 def fix_clock():
   pass
 
-
 def fortune_and_sword():
   pass
-
 
 def get_cloak():
 
@@ -571,7 +556,6 @@ def examine_statue():
       prompt()
 
 def investigate_lump():
- ######################                         #########
   print("You cautiosly approach the lump in the center of the room. It is so like \n" +
 "like the shape and size of a person you expect it to wake up, or at least \n" +
 "breathe. But it does nothing. It just lies there. \n" +
@@ -581,19 +565,12 @@ def investigate_lump():
   vampire_attack()
 
 def vampire_attack():
-  
-
   print("Someone is behind you!\n")
- # ai = VampireAI
-#  ai = vampire()        ####################################### ###########33 ############
-
   my_player = player()
   ai = vampire()
   whereabouts = ai.location.lower()
   playerlocation = my_player.location.lower()
   ai_fight(my_player, ai, whereabouts, playerlocation)
-#  return my_player, ai, whereabouts, playerlocation;
-
 
 def tinkling_bells():
   pass
@@ -603,9 +580,8 @@ def hide_from_the_gardener():
   print("You duck down to avoid the gardener. Who knew there would be anyone here?\n")
 
 def get_coins():
-#    player.attack += 50 // maybe magic points in later versions or adventures
   file = open('inventory.txt','a')
-  file.write('Thirty gold coins\n')
+  file.write('thirty gold coins\n')
   file.close
   prompt()
   
@@ -616,9 +592,13 @@ def open_wooden_box():
   if cmd in ['get coins']:
     get_coins()
 
-# 00000000000000000000000000000000000000000000000000000000000000000000000000000000
+#######################################################################################################
+#                                                                                                     #
+#                                               trap specific content                                 #
+#######################################################################################################
+
 def squish_spider():
-#  playerlocation = my_player.location.lower()
+
   thrownout = "Just as you lift your foot to squish the tarantula spider a door you did not \n"
   thrownout1 = "at first notice flies open. The gardener stomps in. He shouts: 'I knew I heard \n"
   thrownout2 = "something going on in here! You better not ever come back to this house!' \n"
@@ -728,18 +708,13 @@ def squish_spider():
     time.sleep(0.01)
     sys.exit()
 
-#############################################################################
-#
-#
-#    destination = zonemap[my_player.location.upper()][EXIT]
-#    game_over(destination)
-#
-#
-#############################################################################
+#######################################################################################################
+#                                                                                                     #
+#                                               module specific challenges                            #
+#######################################################################################################
 
 def player_commands(myCommandX):
   playerlocation = str(my_player.location.lower())
-#  playerlocations == [ 'great_hall','trophy_room','long_hall','kithchen' ]
   if playerlocation in ['great_hall']:
     
     if myCommandX == ('1'):
@@ -773,6 +748,11 @@ def player_commands(myCommandX):
     elif myCommandX == ('3'):
       squish_spider()
 
+#######################################################################################################
+#                                                                                                     #
+#                                                 necc. specific CMDS                                 #
+#######################################################################################################
+
 def challenges(myAction):
   playerlocation = my_player.location
   print('' + zonemap[my_player.location][EXAMINATION] + ' ')
@@ -785,7 +765,6 @@ def challenges(myAction):
     prompt()
   else:
     player_commands(commandX.lower()) 
-
 
 def show():
   playerlocation = my_player.location.lower()
@@ -804,14 +783,17 @@ def player_status(myAction):
   print(garments)
   file.close()
 
-  print("\nAnd in your hands you have:")
+  print("And in your hands you have:")
   file = open('holding.txt','r')
   worts = file.read()
-  
-
   print(worts)
   file.close()
   prompt()
+
+#######################################################################################################
+#                                                                                                     #
+#                                                      basic commands                                 #
+#######################################################################################################
 
 def player_clear(myAction):
   os.system('clear')
@@ -835,7 +817,13 @@ def player_move(myAction):
     destination = zonemap[my_player.location][WEST]
     movement_handler(destination)
 
+#######################################################################################################
+#                                                                                                     #
+#                                                      prompt                                         #
+#######################################################################################################
+
 def prompt():
+  print('' + my_player.location.upper() + '\n')
   print('challenges - show more - move - look - options - status - quit')
   global playerlocation
   playerlocation = my_player.location
@@ -863,6 +851,11 @@ def prompt():
   elif action.lower() in ['show more']:
     show()
 
+#######################################################################################################
+#                                                                                                     #
+#                                                 generate necc txt files                             #
+#######################################################################################################
+
 def inventory_stripe():
   file = open('inventory.txt','r')
   file.close()
@@ -887,6 +880,11 @@ def treasure_stripe():
   file = open('treasure.txt','r')
   file.close()
 
+#######################################################################################################
+#                                                                                                     #
+#                                                 character CRUD                                      #
+#######################################################################################################
+
 def append_wear(clothing_c):
   file = open('wearing.txt','r+')
   isWearing = file.read()
@@ -902,7 +900,6 @@ def append_wear(clothing_c):
     file.close()
     print("You wear your " + clothing_c + '')
     prompt()
-
 
 def append_WorT(weapon_or_tool_c):
   file = open('holding.txt','r')
@@ -936,8 +933,9 @@ def take_item(want):
     lines = file.readlines()
 
     next_file = open('' + str(playerlocation) + '.txt','w')
+
     for line in lines:
-      if line != ('' + str(want) + ''):
+      if line != ('' + str(want) + '\n'):
         next_file.write(line)
         continue
       continue
@@ -951,7 +949,7 @@ def take_item(want):
   
 def append_inventory(want):
   file = open('inventory.txt','a+')
-  file.write('\n' + str(want) + '\n')
+  file.write('' + str(want) + '\n')
   file.close()
   prompt()
 
@@ -959,7 +957,7 @@ def append_inventory(want):
 def update_room_contents(drop_item):
   playerlocation = my_player.location.lower()
   file = open('' + str(playerlocation) + '.txt','a+')
-  file.write( '\n' + str(drop_item) + '\n')
+  file.write( '' + str(drop_item) + '\n')
   file.close
   prompt()
 
@@ -976,8 +974,8 @@ def drop_wearing(drop_item):
     next_file = open('wearing.txt','w')
 
     for w_line in w_lines:
-      if w_line != ('' + str(drop_item) + ''):
-        file.write(w_line)
+      if w_line != ('' + str(drop_item) + '\n'):
+        next_file.write(w_line)
         continue         
       continue
     
@@ -1001,8 +999,8 @@ def drop_holding(drop_item):
     next_file = open('holding.txt','w')
 
     for h_line in h_lines:
-      if h_line != ('' + str(drop_item) + ''):
-        file.write(h_line)
+      if h_line != ('' + str(drop_item) + '\n'):
+        next_file.write(h_line)
         continue
       continue
     
@@ -1125,16 +1123,17 @@ def inventory_commands(myDecisionX):
       file.close()
       file = open('inventory.txt','r')
       d_lines = file.readlines()
- 
+      
       next_file = open('inventory.txt','w')
 
       for d_line in d_lines:
         if d_line != ('' + str(drop_item) + '\n'):
-          file.write(d_line)
+          next_file.write(d_line)
           continue
         continue
-      next_file.close()
       file.close()
+      next_file.close()
+      
       print("You drop your " + str(drop_item) + " in the " + str(playerlocation) + "")
       drop_holding(drop_item)
     else:
@@ -1167,6 +1166,11 @@ def player_options(myAction):
   else: 
     decisionX.lower() == ('inventory commands')
     inventory_commands(decisionX)
+
+#######################################################################################################
+#                                                                                                     #
+#                                                 set up and main                                     #
+#######################################################################################################
 
 def main_game_loop():
   while my_player.game_over is False:
@@ -1228,6 +1232,11 @@ def setup_game():
   clothing_stripe()
   wearing_stripe()
   treasure_stripe()
+
+#######################################################################################################
+#                                                                                                     #
+#                                                desc first room                                      #
+#######################################################################################################
 
   print('\n\nGREAT_HALL\nA flurry of bats suddenly flaps through the doorway, their screeching barely \n' +
 'audible as they careen past your heads. They flap past you into the rooms \n' +
