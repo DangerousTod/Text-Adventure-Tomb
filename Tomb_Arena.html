@@ -24,19 +24,33 @@
             <table class="table table-bordered table-striped">
               <thead>
                 <tr>
-                  <th>id</th>
-                  <th>name</th>
-                  <th>monsters</th>
+                  <th>ID</th>
+                  <th>ROOM</th>
+                  <th>ZONE</th>
+
+                  <th>NORTH</th>
+                  <th>SOUTH</th>
+                  <th>EAST</th>
+                  <th>WEST</th>
+
 
                   <th width="130">Actions</th>
+                  <p>copy paste heading except for 'zonemap = {' use that only once. Like wise close zonemap with a final }.</p>
+                  <p>|------------>##############      eighty characters    #######################################</p>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="item in items" v-bind:key="item.id">
                   <td>{{ item._id }}</td>
-                  <td>{{ item.name }}</td>
-                  <td>{{ item.monsters }}</td>
+                  <td>{{ item.room }}</td>
+                  <td>{{ item.zone }}</td>
 
+                  <td>{{ item.north }}</td>
+                  <td>{{ item.south }}</td>
+                  <td>{{ item.east }}</td>
+                  <td>{{ item.west }}</td>
+
+                  
                   <td class="text-center">
                     <button @click="edit(item)" class="btn btn-warning btn-sm">Edit</button>
                     <button @click="destroy(item)" class="btn btn-danger btn-sm">Trash</button>
@@ -48,56 +62,57 @@
           <div class="col-md-4">
             <form>
               <div class="form-group">
-                <label>id: &lt;this ID&gt;</label>
-                <input type="text" v-model="input._id" class="form-control" />
+                <label>ID</label>
+                <input type="text" v-model="input._id" class="form-control" maxlength="75" />
               </div>
               <div class="form-group">
-                <label>name: &lt;this name&gt;</label>
-                <input type="text" v-model="input.name" class="form-control" maxlength="100" />
+                <label> zonemap = {'room name' : { </label>
+                <input type="text" v-model="input.room" class="form-control" maxlength="75" />
+              </div>
+              <div class="form-group">
+                <label>ZONENAME: 'name of zone',</label>
+                <input type="text" v-model="input.zone" class="form-control" maxlength="50" />
               </div>
 
              <div class="form-group">
-                <label>description: &lt;this ID&gt; = game.new_location(  &quot;&lt;this name&gt;&quot;,&quot;&quot;&quot;&lt;this description&gt;&quot;&quot;&quot;)</label>
-                <input type="text" v-model="input.description" class="form-control" maxlength="500"/>
+                <label>DESCRIPTION: 'up to 1000 characters new line\n'+'next line to end\n',</label>
+                <input type="text" v-model="input.description" class="form-control" maxlength="1000"/>
               </div>
 
               <div class="form-group">
-                <label>monsters</label>
-                <input type="text" v-model="input.monsters" class="form-control" maxlength="500"/>
+                <label>EXAMINATION: 'numbered items with functions to define',</label>
+                <input type="text" v-model="input.examination" class="form-control" maxlength="1000"/>
               </div>
              <div class="form-group">
-                <label>items: &lt;item ID&gt; = &lt;this ID&gt;.new_object(&quot;&lt;item name&gt;&quot;, &quot;&lt;item description&gt;&quot;)</label>
-                <input type="text" v-model="input.items" class="form-control" maxlength="500"/>
+                <label>SOLVED: True or False,</label>
+                <input type="text" v-model="input.solved" class="form-control" maxlength="22"/>
               </div>
 
              <div class="form-group">
-                <label>north: game.new_connection(&quot;&lt;target name&gt;&quot;, &lt;this ID&gt;, &lt;target ID&gt;, [&lt;TO in CAPS&gt;], [&lt;BACK in CAPS&gt;])</label>
-                <input type="text" v-model="input.north" class="form-control" maxlength="210"/>
+                <label>NORTH: 'exit to room',</label>
+                <input type="text" v-model="input.north" class="form-control" maxlength="50"/>
               </div>
 
               <div class="form-group">
-                <label>south</label>
-                <input type="text" v-model="input.south" class="form-control" maxlength="210"/>
+                <label>SOUTH: 'exit to room',</label>
+                <input type="text" v-model="input.south" class="form-control" maxlength="50"/>
               </div>
 
               <div class="form-group">
-                <label>east</label>
-                <input type="text" v-model="input.east" class="form-control" maxlength="210"/>
+                <label>EAST: 'exit to room',</label>
+                <input type="text" v-model="input.east" class="form-control" maxlength="50"/>
               </div>
 
               <div class="form-group">
-                <label>west</label>
-                <input type="text" v-model="input.west" class="form-control" maxlength="210"/>
+                <label>WEST: 'exit to room',</label>
+                <input type="text" v-model="input.west" class="form-control" maxlength="50"/>
               </div>
 
              <div class="form-group">
-                <label>tresure</label>
-                <input type="text" v-model="input.treasure" class="form-control" maxlength="500"/>
+                <label>OBJECTS: 'comma separated items' },</label>
+                <input type="text" v-model="input.objects" class="form-control" maxlength="500"/>
               </div>
-             <div class="form-group">
-                <label>scares</label>
-                <input type="text" v-model="input.scares" class="form-control" maxlength="200"/>
-              </div>
+
               <button v-if="savebtn" @click.prevent="save" class="btn btn-primary">Save</button>
              
               <button @click.prevent="clear" class="btn btn-info">Clear</button>
@@ -109,7 +124,7 @@
 
 
     <script>
-      window.db = new PouchDB('tomb_arena')
+      window.db = new PouchDB('tomb_zone')
 
       var app = new Vue({
         el: '#app',
@@ -117,16 +132,16 @@
           items : [],
           input: {
             _id: '',
-            name: '',
+            room: '',
+            zone: '',
             description: '',
-            monsters: '',
-            items: '',
+            examination: '',
+            solved: '',
             north: '',
             south: '',
             east: '',
             west: '',
-            treasure: '',
-            scares: ''
+            objects: ''
           },
           savebtn: true,
  //         updatebtn: false
@@ -155,36 +170,36 @@
           },
           save: function () {
             var id = this.input._id
-            var nm = this.input.name
+            var rm = this.input.room
+            var zn = this.input.zone
             var ds = this.input.description
-            var mo = this.input.monsters
-            var it = this.input.items
+            var ex = this.input.examination
+            var sv = this.input.solved
             var nr = this.input.north
             var so = this.input.south
             var ea = this.input.east
             var ws = this.input.west
-            var tr = this.input.treasure
-            var sc = this.input.scares
+            var ob = this.input.objects
 
             db.put({
               _id: id,
-              name: nm,
+              room: rm,
+              zone: zn,
               description: ds,
-              monsters: mo,
-              items: it,
+              examination: ex,
+              solved: sv,
               north: nr,
               south: so,
               east: ea,
               west: ws,
-              treasure: tr,
-              scares: sc
+              objects: ob
             }).then(function(response){
 
             }).catch(function(error) {
               console.log(error)
             })
 
-            this.items.push({_id: id, name: nm, description: ds, monsters: mo, items: it, north: nr, south: so, east: ea, west: ws, treasure: tr, scares: sc})
+            this.items.push({_id: id, room: rm, zone: zn, _description: ds, examination: ex, solved: sv, north: nr, south: so, east: ea, west: ws, objects: ob})
             this.clear()
 
             this.localData()
@@ -195,32 +210,32 @@
             this.savebtn = true
 //            this.updatebtn = false
             this.input._id = ''
-            this.input.name = ''
+            this.input.room = ''
+            this.input.zone = ''
             this.input.description = ''
-            this.input.monsters = ''
-            this.input.items = ''
+            this.input.examination = ''
+            this.input.solved = ''
             this.input.north = ''
             this.input.south = ''
             this.input.east = ''
             this.input.west = ''
-            this.input.treasure = ''
-            this.input.scares = ''
+            this.input.objects = ''
 
           },
           edit: function (item) {
             this.savebtn = true
 //            this.updatebtn = true
             this.input._id = item._id
-            this.input.name = item.name
+            this.input.room = item.room
+            this.input.zone = item.zone
             this.input.description = item.description
-            this.input.monsters = item.monsters
-            this.input.items = item.items
+            this.input.examination = item.examination
+            this.input.solved = item.solved
             this.input.north = item.north
             this.input.south = item.south
             this.input.east = item.east
             this.input.west = item.west
-            this.input.treasure = item.treasure
-            this.input.scares = item.scares
+            this.input.objects = item.objects
           },
 //          update: function (id) {
 // *         var myid = id - 1
