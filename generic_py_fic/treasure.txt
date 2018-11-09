@@ -1,0 +1,4 @@
+crystal
+cloak
+sword
+emerald

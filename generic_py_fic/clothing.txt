@@ -1,0 +1,8 @@
+jeans
+shirt
+jacket
+boots
+backpack
+cap
+cloak
+

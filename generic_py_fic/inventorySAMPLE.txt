@@ -1,0 +1,21 @@
+jeans
+boots
+jacket
+cap
+backpack
+map of town
+emerald
+gum
+lighter
+wand
+cloak
+Thirty gold coins
+shovel
+old belt
+dirty rags
+bronze sword
+dirty rags
+pocketwatch
+copper key
+dirty rags
+<quest item>
