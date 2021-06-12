@@ -1,0 +1,6 @@
+f = 'Are you looking for an AD&D game?\nHave you tried Owlbear Rodeo?'
+s = 'Maybe I am looking for you. I run a mostly RAW AD and D world.'
+t = 'No download. No paywall.\nJust Advanced Dungeons And Dragons.'
+print(f.upper())
+print(s.upper())
+print(t.upper())
